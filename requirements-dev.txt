@@ -1,0 +1,7 @@
+# Tests only. Installed on the appliance too, because every layer of this project
+# is verified on the Zero 2 W as well as on a laptop -- an ARM board with 415 MB of
+# usable RAM finds different bugs than a Mac does.
+-r requirements.txt
+
+pytest==9.1.1
+pytest-asyncio==1.4.0

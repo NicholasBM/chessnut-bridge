@@ -1,0 +1,34 @@
+# Chessnut bridge configuration.
+#
+# Copy this to the SD card's small partition -- the one that appears as `bootfs`
+# when you put the card in a computer -- as `chessnut-bridge.conf`, next to the
+# WiFi settings. It is read once at boot.
+#
+# Format is `key=value`, one per line. `#` starts a comment. Values are used as
+# typed, apart from surrounding spaces, so quotes are not needed and would end up
+# being part of the value.
+
+# Your Chess.com username. Used to read your games; it is public information.
+chesscom_username=your-username
+
+# The password for the appliance's own web page -- NOT your Chess.com password.
+# That page can submit moves in real games, so it is not served at all until this
+# is set to at least 8 characters. You will be asked for it once per browser.
+#
+# It sits in plain text on this partition, which cannot be avoided: this is the
+# only way to tell a machine with no screen anything. It is no worse than what is
+# already here, because the key that decrypts the stored Chess.com session is on
+# the same card. Neither protects against somebody holding the card. What this
+# protects is everyone else on your network.
+web_password=
+
+# --- optional ------------------------------------------------------------------
+
+# How often to ask Chess.com for your games, in seconds. The default suits 3-day
+# correspondence games. Lower it and you are polling a service you do not own more
+# often than its own website does.
+#poll_seconds=60
+
+# The port the page is served on. 80 is the default so that http://chessnut.local/
+# works with nothing appended.
+#web_port=80

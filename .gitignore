@@ -1,0 +1,15 @@
+# The appliance's own secrets and state. None of these belong in a repo: the
+# device key decrypts the stored chess.com session and password, and the
+# configuration file on the SD card holds the page password in clear text.
+*.key
+*.enc
+chessnut-bridge.conf
+state.json
+
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build.log
+
+.DS_Store

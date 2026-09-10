@@ -1,0 +1,17 @@
+# What the appliance needs to run. Pinned to the versions actually proven on the
+# target -- a Pi Zero 2 W running Debian 13 (trixie) with Python 3.13 -- because
+# the whole point of an appliance is that the thing that worked keeps working.
+#
+# Deliberately absent:
+#   httpx / requests -- the read and write paths use urllib. On 512 MB, a second
+#                       HTTP client earns its place or it does not come.
+#   python-multipart -- Starlette wants it before it will parse any form at all,
+#                       including urlencoded. bridge.web.app parses those itself.
+#   pydantic         -- nothing here needs runtime schema validation.
+
+bleak==3.0.2            # BLE, via BlueZ over D-Bus
+chess==1.11.2           # legality and move generation for reconciliation
+cryptography==50.0.1    # Fernet, for the stored Chess.com session
+Jinja2==3.1.6           # the four templates
+starlette==1.6.0        # routing, requests, responses
+uvicorn==0.52.4         # the ASGI server

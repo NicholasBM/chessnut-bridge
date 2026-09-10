@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Sign in &middot; Chess board bridge{% endblock %}
+
+{% block body %}
+<h1>Chess board bridge</h1>
+<div class="card">
+  <form method="post" action="/login">
+    <label for="password">Password from the SD card</label>
+    <input id="password" name="password" type="password" autocomplete="current-password"
+           autofocus required>
+    {% if error %}<p class="quiet" style="color: var(--error)">{{ error }}</p>{% endif %}
+    <p><button class="primary" type="submit">Sign in</button></p>
+  </form>
+  <p class="quiet">This is the <code>web_password</code> line in
+    <code>chessnut-bridge.conf</code> on the card's boot partition &mdash; not your
+    Chess.com password.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{# Everything that changes while the page is open, in one element.
+
+   Rendered both into the full page and into each server-sent update, so there is
+   one description of the state rather than two that can drift. Kept as one blob
+   deliberately: swapping a single element is the whole of the client-side code,
+   and a finer-grained protocol would buy nothing on a page this size. #}
+<div id="status">
+  <p class="headline {{ view.severity }}">{{ view.headline }}</p>
+
+  {% if view.write_needs_attention %}
+  <h2>The last move</h2>
+  <div class="card">
+    <p>{{ view.write_summary }}</p>
+    {% if view.write_detail %}<p class="quiet">{{ view.write_detail }}</p>{% endif %}
+    {% if view.write_can_retry %}
+    <form class="inline" method="post" action="/retry-write">
+      <button class="primary" type="submit">Send it again</button>
+    </form>
+    {% endif %}
+    {% if view.write_can_dismiss %}
+    <form class="inline" method="post" action="/dismiss-write">
+      <button type="submit">Dismiss</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <h2>Board</h2>
+  <div class="card">
+    <p>{{ view.board_summary }}</p>
+    {% if view.board_hint %}<p class="quiet">{{ view.board_hint }}</p>{% endif %}
+    <p class="quiet">Battery {{ view.battery }}.</p>
+    <form class="inline" method="post" action="/reconnect-board">
+      <button type="submit">Reconnect</button>
+    </form>
+  </div>
+
+  <h2>Position</h2>
+  <div class="card">
+    <p>{{ view.sync_summary }}</p>
+    {% if view.sync_detail %}<p class="quiet">{{ view.sync_detail }}</p>{% endif %}
+    {% if view.highlight %}
+    <p class="quiet">Lit on the board:
+      <span class="squares">{{ view.highlight | join(' ') }}</span></p>
+    {% endif %}
+  </div>
+
+  <h2>Chess.com</h2>
+  <div class="card">
+    <p>{{ view.chesscom_summary }}</p>
+    {% if view.chesscom_hint %}<p class="quiet">{{ view.chesscom_hint }}</p>{% endif %}
+    {% if view.login_error %}
+    <p class="quiet" style="color: var(--error)">Last sign-in attempt:
+      {{ view.login_error }}</p>
+    {% endif %}
+    <p class="quiet">{{ view.read_summary }}</p>
+    {% if view.read_hint %}<p class="quiet">{{ view.read_hint }}</p>{% endif %}
+    {% if view.logged_in %}
+    <form class="inline" method="post" action="/chesscom/logout">
+      <button class="danger" type="submit">Sign out of Chess.com</button>
+    </form>
+    {% if view.credentials_remembered %}
+    <form class="inline" method="post" action="/chesscom/forget">
+      <button type="submit">Forget the password</button>
+    </form>
+    {% endif %}
+    {% else %}
+    <p>
+      <a href="/chesscom/login"><button class="primary" type="button">Sign in to
+        Chess.com</button></a>
+      {% if view.credentials_remembered %}
+      <form class="inline" method="post" action="/chesscom/retry-login">
+        <button type="submit">Try the stored password now</button>
+      </form>
+      {% endif %}
+    </p>
+    {% endif %}
+  </div>
+
+  <h2>Games</h2>
+  {% if view.games %}
+  <ul class="games">
+    {% for game in view.games %}
+    <li>
+      <span class="grow">
+        <a href="{{ game.url }}" rel="noreferrer">Game {{ game.id }}</a>
+        {% if game.matches_board %}<span class="tag">on the board</span>{% endif %}
+        <br>
+        <span class="quiet">{{ game.turn }} &middot; {{ game.deadline }}</span>
+      </span>
+      {% if game.is_selected %}
+      <span class="tag now">following</span>
+      <form class="inline" method="post" action="/select-game">
+        <input type="hidden" name="game_id" value="">
+        <button type="submit">Stop</button>
+      </form>
+      {% else %}
+      <form class="inline" method="post" action="/select-game">
+        <input type="hidden" name="game_id" value="{{ game.id }}">
+        <button type="submit">Follow</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="quiet">Nothing is chosen for you: two games in the same opening look
+    identical to the board, so following the wrong one would send a legal move
+    into a game you were not playing.</p>
+  {% else %}
+  <div class="card"><p class="quiet">No games in progress were found.</p></div>
+  {% endif %}
+</div>

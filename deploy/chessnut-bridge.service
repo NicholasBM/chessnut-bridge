@@ -1,0 +1,84 @@
+[Unit]
+Description=Chessnut board to Chess.com bridge
+Documentation=file:///opt/chessnut-bridge/deploy/README.md
+
+# Bluetooth is required for the board and the network for Chess.com, but neither
+# is a condition of starting. The service is written to come up without them and
+# say so on its page, which is the only way anyone finds out what is wrong on a
+# machine with no screen. Ordering here just avoids a guaranteed-failing first
+# attempt at boot.
+After=bluetooth.target network-online.target
+Wants=network-online.target
+
+# Never stop trying. Systemd's default gives up after five starts in ten seconds,
+# and an appliance that has given up is indistinguishable from a dead one to
+# someone with no screen. The crash loop stays in the journal either way.
+# This belongs in [Unit]: in [Service] it is silently ignored.
+StartLimitIntervalSec=0
+
+[Service]
+Type=exec
+User=chessnut
+Group=chessnut
+# BlueZ's D-Bus policy allows any local user to talk to org.bluez, so the board
+# needs no privilege. This group is here for the adapter-management calls that
+# some BlueZ builds gate on it, and costs nothing if unused.
+SupplementaryGroups=bluetooth
+
+WorkingDirectory=/opt/chessnut-bridge
+Environment=PYTHONPATH=/opt/chessnut-bridge/src
+Environment=PYTHONUNBUFFERED=1
+Environment=CHESSNUT_BRIDGE_STATE_DIR=/var/lib/chessnut-bridge
+Environment=CHESSNUT_BRIDGE_KEY=/etc/chessnut-bridge/session.key
+ExecStart=/opt/chessnut-bridge/.venv/bin/python -m bridge
+
+# Port 80, so http://chessnut.local/ works with nothing appended. A capability,
+# not root: this is the only privilege the process has, and it cannot acquire
+# another because of NoNewPrivileges below.
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+Restart=always
+RestartSec=5
+
+# --- hardening ---
+# The threat this actually addresses is a bug in this code, or in a page that can
+# submit moves, reaching further than it should. It is not a defence against
+# somebody holding the SD card, which nothing here can be.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+# AF_BLUETOOTH is deliberately absent: bluetoothd owns the HCI socket and bleak
+# reaches it over D-Bus, which is AF_UNIX. If a future change needs raw HCI this
+# is the line that will refuse it, and that refusal is the right default.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# Everything else is read-only. Two exceptions, deliberately in separate places:
+# the session the appliance rewrites, and the key that decrypts it. Copying the
+# first without the second gets you nothing.
+ReadWritePaths=/var/lib/chessnut-bridge
+ReadWritePaths=/etc/chessnut-bridge
+
+# The configuration lives on the FAT32 boot partition, which the owner edits in a
+# laptop. Read-only here: nothing this process does should be able to change the
+# password that protects it.
+ReadOnlyPaths=/boot/firmware
+
+# 415 MB of RAM, one of which is this. A limit rather than a slow slide into the
+# OOM killer taking Bluetooth or sshd with it.
+MemoryMax=200M
+MemoryHigh=150M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Sign in to Chess.com &middot; Chess board bridge{% endblock %}
+
+{% block body %}
+<h1>Sign in to Chess.com</h1>
+<div class="card">
+  <form method="post" action="/chesscom/login">
+    <label for="username">Chess.com username</label>
+    <input id="username" name="username" type="text" autocapitalize="none"
+           autocomplete="username" value="{{ username }}" required>
+
+    <p></p>
+    <label for="password">Chess.com password</label>
+    <input id="password" name="password" type="password"
+           autocomplete="current-password" autofocus required>
+
+    {% if error %}
+    <p class="quiet" style="color: var(--error)">{{ error }}</p>
+    {% if hint %}<p class="quiet">{{ hint }}</p>{% endif %}
+    {% endif %}
+
+    <p class="quiet">
+      <label style="display: inline">
+        <input type="checkbox" name="remember" checked>
+        Remember it, so the appliance can sign itself back in
+      </label>
+    </p>
+    <p>
+      <button class="primary" type="submit">Sign in</button>
+      <a href="/">Cancel</a>
+    </p>
+  </form>
+</div>
+
+{# Said here rather than in a README nobody has to hand: this is the one screen
+   where the owner is deciding to hand over a real account password, and the
+   trade-off is only useful at the moment the decision is made. #}
+<h2>What happens to it</h2>
+<div class="card">
+  <p class="quiet">This is your real Chess.com password &mdash; the appliance uses
+    it to sign in the same way a browser does, because reading your games needs no
+    login but <em>submitting a move</em> does.</p>
+  <p class="quiet">Ticking the box stores it encrypted on the card, in
+    <code>/var/lib/chessnut-bridge</code>, with the key kept in a different
+    directory. That is what lets the bridge carry on working when the session
+    expires weeks from now with nobody here to retype it. It is <strong>not</strong>
+    protection against somebody holding the SD card, and nothing on a Pi can be.</p>
+  <p class="quiet">Untick it to get a session now and store nothing; you will need
+    to come back and do this again when it lapses.</p>
+  <p class="quiet">If this account has two-factor authentication, this cannot work
+    &mdash; the appliance has no way to answer the prompt.</p>
+</div>
+{% endblock %}

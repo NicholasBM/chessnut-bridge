@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Not configured &middot; Chess board bridge{% endblock %}
+
+{% block body %}
+<h1>Chess board bridge</h1>
+<p class="headline error">This appliance is not configured yet.</p>
+
+<div class="card">
+  <ul>
+    {% for problem in config.problems %}<li>{{ problem }}</li>{% endfor %}
+  </ul>
+</div>
+
+<h2>How to fix it</h2>
+<div class="card">
+  <p>Put the SD card in a computer. On the small partition that appears
+    (<code>bootfs</code>), create or edit <code>chessnut-bridge.conf</code>:</p>
+  <pre><code>chesscom_username=your-chess-com-username
+web_password=a-password-for-this-page</code></pre>
+  <p class="quiet">Then put the card back and power the appliance on. The password
+    protects this page, which can submit moves in your games &mdash; so it will not
+    be served at all until one is set.</p>
+</div>
+{% endblock %}

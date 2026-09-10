@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1>Chess board bridge</h1>
+
+{% include "_status.html" %}
+
+<h2>This appliance</h2>
+<div class="card">
+  <p class="quiet">Chess.com account <code>{{ config.chesscom_username }}</code>,
+    configured in <code>{{ config.source }}</code> on the SD card.</p>
+  <form class="inline" method="post" action="/logout">
+    <button type="submit">Sign out of this page</button>
+  </form>
+</div>
+
+<script>
+  // The only script on the page: replace the status block when the server says
+  // it changed. EventSource reconnects on its own, so a dropped WiFi link needs
+  // no handling here -- and if the stream never comes back, a reload still shows
+  // the current state, because the page is rendered server-side.
+  const stream = new EventSource("/events");
+  stream.addEventListener("status", (event) => {
+    const holder = document.createElement("div");
+    holder.innerHTML = event.data;
+    const fresh = holder.querySelector("#status");
+    const current = document.getElementById("status");
+    if (fresh && current) current.replaceWith(fresh);
+  });
+</script>
+{% endblock %}
