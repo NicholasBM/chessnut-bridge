@@ -58,7 +58,8 @@ is worth checking the WiFi password twice.
 Leave the card in your computer after Imager finishes and open the small
 partition that appears — **`bootfs`**. Copy
 [`deploy/chessnut-bridge.conf.example`](deploy/chessnut-bridge.conf.example) onto
-it as **`chessnut-bridge.conf`**, and edit two lines:
+it, **rename it to `chessnut-bridge.conf`** (dropping `.example`), and edit two
+lines:
 
 ```
 chesscom_username=your-chess-com-username
@@ -71,6 +72,12 @@ missing or shorter than 8 characters the page serves nothing but an explanation
 of what to fix. That is on purpose: this page can submit moves in your real
 games, and quietly falling back to no password would be the worst possible
 outcome of a typo.
+
+The rename is not busywork. This repository ships the file under a name the Pi
+deliberately ignores, because the real one holds a password and a tracked file
+with the real name is the file people edit in a checkout — one `git add` away from
+being in a public history forever. `.gitignore` ignores `chessnut-bridge.conf`
+for the same reason.
 
 Both of these sit in plain text on a FAT32 partition, which cannot be avoided —
 it is the only way to tell a machine with no screen anything. See
